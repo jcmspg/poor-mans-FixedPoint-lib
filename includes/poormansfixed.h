@@ -6,7 +6,7 @@
 /*   By: joamiran <joamiran@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/26 19:45:56 by joamiran          #+#    #+#             */
-/*   Updated: 2025/07/27 17:24:30 by joamiran         ###   ########.fr       */
+/*   Updated: 2025/07/27 18:17:52 by joamiran         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,10 @@
 
 # define FIXED_ONE_32 (1 << FIXED_SHIFT_32)
 # define FIXED_ONE_64 (1LL << FIXED_SHIFT_64)
-# define FIXED_TWO_64 (2LL << FIXED_ONE_64)
+# define FIXED_TWO_32 (2 * FIXED_ONE_32)
+# define FIXED_TWO_64 (2LL * FIXED_ONE_64)
+# define FIXED_HALF_32 (FIXED_ONE_32 / 2)
+# define FIXED_HALF_64 (FIXED_ONE_64 / 2)
 
 // Define your types here
 typedef int32_t	t_fixed32;
