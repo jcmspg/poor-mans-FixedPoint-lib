@@ -51,7 +51,7 @@ Fixed-point arithmetic offers several advantages over floating-point math:
 - **Perfect for raycasting**: Maintains adequate precision for distance calculations and trigonometric operations
 - **Predictable behavior**: No floating-point edge cases or NaN/infinity issues
 
-![pros and cons](assets/fp%20vs%20float.png)
+![pros and cons](assets/fp%20vs%20float_bw.png)
 
 ## Features
 
