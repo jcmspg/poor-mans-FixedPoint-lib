@@ -295,7 +295,7 @@ poormans_fixedpoint_lib/
 ### Build Commands
 
 ```bash
-git clone <your-repo-url>
+git clone <this repo URL>
 cd poormans_fixedpoint_lib
 make                    # Build the library
 make install           # Install system-wide (requires sudo)
@@ -328,6 +328,9 @@ Contributions are welcome! Priority areas for improvement:
 
 ## Author
 
+joao gomes
+
+--- 
 Created for efficient raycasting in cub3d and other performance-critical applications where floating-point is overkill.
 
 _"Could you spare some efficiency, sir?"_
