@@ -160,21 +160,27 @@ typedef int64_t t_fixed64;  // 64-bit fixed-point (32.32 format)
 
 ### 32-bit Operations
 
-| Function            | Description                                      |
-| ------------------- | ------------------------------------------------ |
-| `fixed32_add(a, b)` | Addition: a + b                                  |
-| `fixed32_sub(a, b)` | Subtraction: a - b                               |
-| `fixed32_mul(a, b)` | Multiplication: a × b (uses 64-bit intermediate) |
-| `fixed32_div(a, b)` | Division: a ÷ b (returns 0 if b = 0)             |
+| Function            | Description                                       |
+| ------------------- | ------------------------------------------------- |
+| `fixed32_add(a, b)` | Addition: a + b                                   |
+| `fixed32_sub(a, b)` | Subtraction: a - b                                |
+| `fixed32_mul(a, b)` | Multiplication: a × b (uses 64-bit intermediate)  |
+| `fixed32_div(a, b)` | Division: a ÷ b (returns 0 if b = 0)              |
+| `fixed32_abs(a)`    | Absolute value: \|a\|                             |
+| `fixed32_square(a)` | Square: a²                                        |
+| `fixed32_sqrt(a)`   | Square root: √a (Newton's method, ~10 iterations) |
 
 ### 64-bit Operations
 
-| Function            | Description                          |
-| ------------------- | ------------------------------------ |
-| `fixed64_add(a, b)` | Addition: a + b                      |
-| `fixed64_sub(a, b)` | Subtraction: a - b                   |
-| `fixed64_mul(a, b)` | Multiplication: a × b (may overflow) |
-| `fixed64_div(a, b)` | Division: a ÷ b (returns 0 if b = 0) |
+| Function            | Description                                       |
+| ------------------- | ------------------------------------------------- |
+| `fixed64_add(a, b)` | Addition: a + b                                   |
+| `fixed64_sub(a, b)` | Subtraction: a - b                                |
+| `fixed64_mul(a, b)` | Multiplication: a × b (may overflow)              |
+| `fixed64_div(a, b)` | Division: a ÷ b (returns 0 if b = 0)              |
+| `fixed64_abs(a)`    | Absolute value: \|a\|                             |
+| `fixed64_square(a)` | Square: a²                                        |
+| `fixed64_sqrt(a)`   | Square root: √a (Newton's method, ~20 iterations) |
 
 ### Conversion Functions
 
@@ -202,15 +208,29 @@ typedef struct s_wall {
     t_fixed32 x, y;     // Wall position
 } t_wall;
 
+t_fixed32 calculate_distance(t_ray ray, t_wall wall)
+{
+    // Calculate actual distance using fixed-point sqrt
+    t_fixed32 dx = fixed32_sub(wall.x, ray.x);
+    t_fixed32 dy = fixed32_sub(wall.y, ray.y);
+
+    t_fixed32 distance_squared = fixed32_add(
+        fixed32_square(dx),
+        fixed32_square(dy)
+    );
+
+    return fixed32_sqrt(distance_squared);
+}
+
+// Fast distance comparison without sqrt
 t_fixed32 calculate_distance_squared(t_ray ray, t_wall wall)
 {
-    // Calculate distance without floating-point operations
     t_fixed32 dx = fixed32_sub(wall.x, ray.x);
     t_fixed32 dy = fixed32_sub(wall.y, ray.y);
 
     return fixed32_add(
-        fixed32_mul(dx, dx),
-        fixed32_mul(dy, dy)
+        fixed32_square(dx),
+        fixed32_square(dy)
     );
 }
 
@@ -229,11 +249,14 @@ void raycast_example(void)
         .y = to_fixed32(12.0f)
     };
 
+    // Option 1: Actual distance (slower, more accurate)
+    t_fixed32 distance = calculate_distance(player_ray, wall);
+
+    // Option 2: Distance squared (faster, for comparisons)
     t_fixed32 dist_sq = calculate_distance_squared(player_ray, wall);
 
     // Convert back only when needed for rendering
-    float render_distance = from_fixed32(dist_sq);
-    // Note: You'd typically implement a fixed-point sqrt for actual distance
+    float render_distance = from_fixed32(distance);
 }
 ```
 
@@ -295,7 +318,7 @@ poormans_fixedpoint_lib/
 ### Build Commands
 
 ```bash
-git clone <this repo URL>
+git clone https://github.com/jcmspg/poor-mans-FixedPoint-lib
 cd poormans_fixedpoint_lib
 make                    # Build the library
 make install           # Install system-wide (requires sudo)
@@ -320,17 +343,19 @@ This project is open source. Feel free to use it in your projects, including cub
 
 Contributions are welcome! Priority areas for improvement:
 
-- **Mathematical functions**: sqrt, sin, cos, atan2 implementations
+- **Mathematical functions**: sin, cos, atan2, tan implementations
 - **Overflow detection**: Optional safety modes for debugging
 - **Platform optimizations**: SIMD instructions, ARM NEON support
 - **Extended precision**: 128-bit fixed-point for specialized cases
 - **Benchmarking suite**: Performance comparison tools
+- **Improved sqrt**: Faster approximation methods or lookup tables
 
 ## Author
 
 joao gomes
 
---- 
+---
+
 Created for efficient raycasting in cub3d and other performance-critical applications where floating-point is overkill.
 
 _"Could you spare some efficiency, sir?"_
