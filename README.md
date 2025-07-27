@@ -328,7 +328,7 @@ Contributions are welcome! Priority areas for improvement:
 
 ## Author
 
-joao homes
+joao gomes
 
 --- 
 Created for efficient raycasting in cub3d and other performance-critical applications where floating-point is overkill.
