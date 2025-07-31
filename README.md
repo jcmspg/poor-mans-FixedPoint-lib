@@ -142,6 +142,36 @@ double result = from_fixed64(distance_squared);
 // Note: This gives you distance², not distance (sqrt not implemented)
 ```
 
+#### Trigonometry Example
+
+```c
+#include "poormansfixed.h"
+#include <stdio.h>
+
+int main(void)
+{
+    // 32-bit trigonometry
+    t_fixed32 angle_32 = to_fixed32(M_PI / 4);  // 45 degrees
+    t_fixed32 sin_val = fixed32_sin(angle_32);
+    t_fixed32 cos_val = fixed32_cos(angle_32);
+    t_fixed32 tan_val = fixed32_tan(angle_32);
+    
+    printf("32-bit: sin(π/4) = %f\n", from_fixed32(sin_val));  // ≈ 0.707
+    printf("32-bit: cos(π/4) = %f\n", from_fixed32(cos_val));  // ≈ 0.707
+    printf("32-bit: tan(π/4) = %f\n", from_fixed32(tan_val));  // ≈ 1.0
+    
+    // 64-bit trigonometry (higher precision)
+    t_fixed64 angle_64 = to_fixed64(M_PI / 6);  // 30 degrees
+    t_fixed64 sin_val_64 = fixed64_sin(angle_64);
+    t_fixed64 cos_val_64 = fixed64_cos(angle_64);
+    
+    printf("64-bit: sin(π/6) = %f\n", from_fixed64(sin_val_64));  // ≈ 0.5
+    printf("64-bit: cos(π/6) = %f\n", from_fixed64(cos_val_64));  // ≈ 0.866
+    
+    return (0);
+}
+```
+
 ## API Reference
 
 ### Types
@@ -160,27 +190,33 @@ typedef int64_t t_fixed64;  // 64-bit fixed-point (32.32 format)
 
 ### 32-bit Operations
 
-| Function            | Description                                       |
-| ------------------- | ------------------------------------------------- |
-| `fixed32_add(a, b)` | Addition: a + b                                   |
-| `fixed32_sub(a, b)` | Subtraction: a - b                                |
-| `fixed32_mul(a, b)` | Multiplication: a × b (uses 64-bit intermediate)  |
-| `fixed32_div(a, b)` | Division: a ÷ b (returns 0 if b = 0)              |
-| `fixed32_abs(a)`    | Absolute value: \|a\|                             |
-| `fixed32_square(a)` | Square: a²                                        |
-| `fixed32_sqrt(a)`   | Square root: √a (Newton's method, ~10 iterations) |
+| Function            | Description                                      |
+| ------------------- | ------------------------------------------------ |
+| `fixed32_add(a, b)` | Addition: a + b                                  |
+| `fixed32_sub(a, b)` | Subtraction: a - b                               |
+| `fixed32_mul(a, b)` | Multiplication: a × b (uses 64-bit intermediate) |
+| `fixed32_div(a, b)` | Division: a ÷ b (returns 0 if b = 0)             |
+| `fixed32_abs(a)`    | Absolute value: \|a\|                            |
+| `fixed32_square(a)` | Square: a²                                       |
+| `fixed32_sqrt(a)`   | Square root: √a (Newton's method, ~20 iterations)|
+| `fixed32_sin(a)`    | Sine: sin(a) (Taylor series, 5 terms max)       |
+| `fixed32_cos(a)`    | Cosine: cos(a) = sin(a + π/2)                    |
+| `fixed32_tan(a)`    | Tangent: tan(a) = sin(a) / cos(a)                |
 
 ### 64-bit Operations
 
-| Function            | Description                                       |
-| ------------------- | ------------------------------------------------- |
-| `fixed64_add(a, b)` | Addition: a + b                                   |
-| `fixed64_sub(a, b)` | Subtraction: a - b                                |
-| `fixed64_mul(a, b)` | Multiplication: a × b (may overflow)              |
-| `fixed64_div(a, b)` | Division: a ÷ b (returns 0 if b = 0)              |
-| `fixed64_abs(a)`    | Absolute value: \|a\|                             |
-| `fixed64_square(a)` | Square: a²                                        |
-| `fixed64_sqrt(a)`   | Square root: √a (Newton's method, ~20 iterations) |
+| Function            | Description                                      |
+| ------------------- | ------------------------------------------------ |
+| `fixed64_add(a, b)` | Addition: a + b                                  |
+| `fixed64_sub(a, b)` | Subtraction: a - b                               |
+| `fixed64_mul(a, b)` | Multiplication: a × b (may overflow)             |
+| `fixed64_div(a, b)` | Division: a ÷ b (returns 0 if b = 0)             |
+| `fixed64_abs(a)`    | Absolute value: \|a\|                            |
+| `fixed64_square(a)` | Square: a²                                       |
+| `fixed64_sqrt(a)`   | Square root: √a (Newton's method, ~20 iterations)|
+| `fixed64_sin(a)`    | Sine: sin(a) (Taylor series, 7 terms max)       |
+| `fixed64_cos(a)`    | Cosine: cos(a) = sin(a + π/2)                    |
+| `fixed64_tan(a)`    | Tangent: tan(a) = sin(a) / cos(a)                |
 
 ### Conversion Functions
 
@@ -201,24 +237,31 @@ Here's how you might use this library in a raycasting engine:
 // Ray-wall intersection using fixed-point
 typedef struct s_ray {
     t_fixed32 x, y;     // Ray position
-    t_fixed32 dx, dy;   // Ray direction
+    t_fixed32 angle;    // Ray direction angle
 } t_ray;
 
 typedef struct s_wall {
     t_fixed32 x, y;     // Wall position
 } t_wall;
 
+// Calculate ray direction using trigonometry
+void calculate_ray_direction(t_ray *ray, t_fixed32 *dx, t_fixed32 *dy)
+{
+    *dx = fixed32_cos(ray->angle);
+    *dy = fixed32_sin(ray->angle);
+}
+
+// Calculate actual distance using fixed-point sqrt
 t_fixed32 calculate_distance(t_ray ray, t_wall wall)
 {
-    // Calculate actual distance using fixed-point sqrt
     t_fixed32 dx = fixed32_sub(wall.x, ray.x);
     t_fixed32 dy = fixed32_sub(wall.y, ray.y);
-
+    
     t_fixed32 distance_squared = fixed32_add(
         fixed32_square(dx),
         fixed32_square(dy)
     );
-
+    
     return fixed32_sqrt(distance_squared);
 }
 
@@ -227,7 +270,7 @@ t_fixed32 calculate_distance_squared(t_ray ray, t_wall wall)
 {
     t_fixed32 dx = fixed32_sub(wall.x, ray.x);
     t_fixed32 dy = fixed32_sub(wall.y, ray.y);
-
+    
     return fixed32_add(
         fixed32_square(dx),
         fixed32_square(dy)
@@ -240,8 +283,7 @@ void raycast_example(void)
     t_ray player_ray = {
         .x = to_fixed32(5.5f),
         .y = to_fixed32(7.2f),
-        .dx = to_fixed32(0.707f),  // 45-degree angle
-        .dy = to_fixed32(0.707f)
+        .angle = to_fixed32(M_PI / 4)  // 45-degree angle
     };
 
     t_wall wall = {
@@ -249,14 +291,21 @@ void raycast_example(void)
         .y = to_fixed32(12.0f)
     };
 
+    // Calculate ray direction
+    t_fixed32 ray_dx, ray_dy;
+    calculate_ray_direction(&player_ray, &ray_dx, &ray_dy);
+
     // Option 1: Actual distance (slower, more accurate)
     t_fixed32 distance = calculate_distance(player_ray, wall);
-
+    
     // Option 2: Distance squared (faster, for comparisons)
     t_fixed32 dist_sq = calculate_distance_squared(player_ray, wall);
-
+    
     // Convert back only when needed for rendering
     float render_distance = from_fixed32(distance);
+    
+    printf("Ray direction: (%f, %f)\n", from_fixed32(ray_dx), from_fixed32(ray_dy));
+    printf("Distance to wall: %f\n", render_distance);
 }
 ```
 
@@ -290,6 +339,7 @@ This is a "poor man's" library — we prioritize speed over safety:
 
 - **Multiplication**: 32-bit uses 64-bit intermediate results to prevent overflow
 - **Division**: Includes shift optimization for better precision
+- **Trigonometry**: Optimized Taylor series with early termination
 - **Branch-prediction friendly**: Minimal conditional logic in hot paths
 - **Cache-friendly**: Simple integer operations, no lookup tables
 
@@ -343,12 +393,12 @@ This project is open source. Feel free to use it in your projects, including cub
 
 Contributions are welcome! Priority areas for improvement:
 
-- **Mathematical functions**: sin, cos, atan2, tan implementations
-- **Overflow detection**: Optional safety modes for debugging
+- **Additional functions**: atan2, asin, acos implementations
+- **Optimization**: Lookup tables for trigonometric functions
 - **Platform optimizations**: SIMD instructions, ARM NEON support
 - **Extended precision**: 128-bit fixed-point for specialized cases
 - **Benchmarking suite**: Performance comparison tools
-- **Improved sqrt**: Faster approximation methods or lookup tables
+- **Advanced math**: Logarithms, exponentials, hyperbolic functions
 
 ## Author
 

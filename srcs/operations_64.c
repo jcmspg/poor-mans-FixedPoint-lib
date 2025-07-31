@@ -6,7 +6,7 @@
 /*   By: joamiran <joamiran@student.42lisboa.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/26 19:48:13 by joamiran          #+#    #+#             */
-/*   Updated: 2025/07/27 18:21:29 by joamiran         ###   ########.fr       */
+/*   Updated: 2025/07/31 20:06:57 by joamiran         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,29 +51,6 @@ t_fixed64	fixed64_abs(t_fixed64 a)
 	else
 		return (a);
 }
-
-// old and wrong implementation
-
-// t_fixed64	fixed64_sqrt(t_fixed64 a)
-// {
-// 	t_fixed64 x;
-// 	t_fixed64 y;
-// 	t_fixed64 epsilon;
-// 	int i;
-
-// 	if (a <= 0)
-// 		return (0);
-// 	i = 0;
-// 	x = a;
-// 	y = FIXED_ONE_64;
-// 	epsilon = (1LL << (FIXED_SHIFT_64 - 8)); // 0.0625
-// 	while ((i++ < 20) && fixed64_abs(x - y) > epsilon)
-// 	{
-// 		x = fixed64_div((x + y), FIXED_TWO_64); // (x + y) / 2
-// 		y = fixed64_div(a, x);
-// 	}
-// 	return (x);
-// }
 
 t_fixed64	fixed64_sqrt(t_fixed64 a)
 {

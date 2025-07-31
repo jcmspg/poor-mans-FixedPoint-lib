@@ -12,14 +12,18 @@ INCLUDE_DIR = includes
 # List your source files explicitly here
 SRCS = $(SRC_DIR)/conversions.c \
        $(SRC_DIR)/operations_32.c \
-       $(SRC_DIR)/operations_64.c
+       $(SRC_DIR)/operations_64.c \
+       $(SRC_DIR)/trigonometry_32.c \
+       $(SRC_DIR)/trigonometry_64.c
 
 OBJS = $(SRC_DIR:$(SRC_DIR)%.c=$(OBJ_DIR)%.o)
 
 # Convert source files to object files
 OBJS = $(OBJ_DIR)/conversions.o \
        $(OBJ_DIR)/operations_32.o \
-       $(OBJ_DIR)/operations_64.o
+       $(OBJ_DIR)/operations_64.o \
+       $(OBJ_DIR)/trigonometry_32.o \
+       $(OBJ_DIR)/trigonometry_64.o
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(OBJ_DIR)
